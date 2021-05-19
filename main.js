@@ -1,3 +1,5 @@
+//https://stackoverflow.com/questions/36667930/javascript-formula-for-computing-the-vector-normal
+
 var viewWidth = 800;
 var viewHeight = 640;
 
