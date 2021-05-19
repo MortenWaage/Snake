@@ -26,7 +26,7 @@ var container;
 
 
 var deltaTime;
-var frameRate = 13;
+var frameRate = 30;
 
 
 
@@ -70,7 +70,7 @@ function Init()
 function Start()
 {
 
-    setInterval(Update, frameRate);
+    setInterval(Update, frameRate/1000);
 
 }
 
