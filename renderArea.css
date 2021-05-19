@@ -1,0 +1,11 @@
+.gameView {
+
+    width: 800px;
+    height: 640px;
+    background-color: rgb(85, 97, 107);
+   }
+
+.playerModel{
+    position: absolute;
+    color: rgb(0, 226, 102);
+}
