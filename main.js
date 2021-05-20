@@ -184,7 +184,7 @@ function CheckFoodCollision()
 {
     if (x + playerSize > foodX && x < foodX + foodSize && y + playerSize > foodY && y < foodY + foodSize)
     {
-        playerMaxSpeed += 1;
+        playerMaxSpeed += 5;
         UpdateScoreList();
         PlaceFood();
     }        
@@ -237,7 +237,7 @@ function CheckWallCollision()
 
 function UpdateDebug()
 {
-    debug.innerHTML = "X: " + x + ". Y: " + y + "." + '<p></p>' + "FoodX: " + foodX + ". FoodY: " + foodY + ".";
+    debug.innerHTML = "X: " + x + ". Y: " + y + "." + '<p></p>' + "FoodX: " + foodX + ". FoodY: " + foodY + "." + '<p></p>' + "Speed: " + playerMaxSpeed;
 }
 
 
