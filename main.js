@@ -1,3 +1,5 @@
+// TODO - Make Class for head of Worm and the food.
+
 var viewWidth = 800;
 var viewHeight = 640;
 
