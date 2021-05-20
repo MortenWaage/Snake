@@ -123,10 +123,19 @@ function SetPlayerDirectionAndSpeed()
     playerPosition.x += (playerMaxSpeed * magnitudeX ) * deltaTime;
     playerPosition.y += (playerMaxSpeed * magnitudeY ) * deltaTime;
 
-    for (i = 0; i < wormSegments.length; i++)
+    // for (i = 0; i < wormSegments.length; i++)
+    // {
+    //     wormSegments[i].position.x += (playerMaxSpeed * magnitudeX ) * deltaTime;
+    //     wormSegments[i].position.y += (playerMaxSpeed * magnitudeY ) * deltaTime;
+    // }
+
+    wormSegments[0].position.x = playerPosition.x - (dirx * 28);
+    wormSegments[0].position.y = playerPosition.y - (diry * 28);
+
+    for (i = wormSegments.length-1; i > 0; i--)
     {
-        wormSegments[i].position.x += (playerMaxSpeed * magnitudeX ) * deltaTime;
-        wormSegments[i].position.y += (playerMaxSpeed * magnitudeY ) * deltaTime;
+        wormSegments[i].position.x = wormSegments[i-1].position.x - (dirx * 28);
+        wormSegments[i].position.y = wormSegments[i-1].position.y - (diry * 28);
     }
 }
 
