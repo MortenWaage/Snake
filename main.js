@@ -184,6 +184,7 @@ function CheckFoodCollision()
 {
     if (x + playerSize > foodX && x < foodX + foodSize && y + playerSize > foodY && y < foodY + foodSize)
     {
+        playerMaxSpeed += 1;
         UpdateScoreList();
         PlaceFood();
     }        
