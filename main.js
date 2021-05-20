@@ -205,7 +205,6 @@ function CheckWallCollision()
     {
         playerObject.style.left = GetPixels(0);
         dirx = 0;
-        hasCollided = true;
 
     }
     //Right
@@ -213,21 +212,18 @@ function CheckWallCollision()
     {
         playerObject.style.left = GetPixels(viewWidth-playerSize);
         dirx = 0;
-        hasCollided = true;
     }
     //Top
     if (y < 0)
     {
         playerObject.style.top = GetPixels(0);
         diry = 0;
-        hasCollided = true;
     }
     //Bottom
     if (y > viewHeight - playerSize)
     {
         playerObject.style.top = GetPixels(viewHeight-playerSize);
         diry = 0;
-        hasCollided = true;
     }     
 }
 
