@@ -34,6 +34,10 @@
     position: absolute;
 }
 
+.wormSegment{
+    position: absolute;
+}
+
 .food{
     position: absolute;
 }

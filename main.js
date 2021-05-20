@@ -11,7 +11,9 @@ var foodSprite = "sprites/food.png";
 var foodObject;
 
 var playerObject;
-var playerSegments = [];
+var wormSegments = [];
+
+var playerPosition;
 
 var playerSize = 32;
 var foodSize = 40;
@@ -19,11 +21,7 @@ var foodSize = 40;
 var dirx = 0;
 var diry = 0;
 
-var x = 200;
-var y = 100;
-
-var foodX;
-var foodY;
+var foodPosition;
 
 var score = 0;
 var scoreBoard;
@@ -31,7 +29,6 @@ var scoreBoard;
 
 var playerCurrentSpeed = 0;
 var playerMaxSpeed = 20;
-var playerDirection = new Vector2(0,0);
 
 
 var container;
@@ -46,9 +43,10 @@ var frameRate = 30;
 // Initial Config
 function Init()
 {
+    playerPosition = new Vector2(200,300);
+    foodPosition = new Vector2(300,200);
 
     deltaTime = frameRate/1000;
-
 
     document.addEventListener("keydown", GetPlayerInput);
     scoreBoard = document.getElementById("scoreBoard");
@@ -60,13 +58,15 @@ function Init()
     // Set up the Player Object
 
     RunPlayerObjectSetup();
-    RunFoodSetup();
-     
+    RunFoodSetup();   
+
 
     debug = document.getElementById("debug");
 
     Start();
 }
+
+
 
 
 
@@ -89,7 +89,7 @@ function Update()
 
     SetPlayerDirectionAndSpeed();
 
-    SetPlayerPosition(x,y); 
+    UpdateWorm();    
 
     CheckCollisions();
 
@@ -99,16 +99,16 @@ function Update()
 
 function PlaceFood()
 {
-    foodX = Math.random() * viewWidth;
-    foodY = Math.random() * viewHeight;
+    foodPosition.x = Math.random() * viewWidth;
+    foodPosition.y = Math.random() * viewHeight;
 
-    if (foodX > viewWidth-foodSize)
-        foodX -= foodSize;
-    if (foodY > viewHeight-foodSize)
-        foodY -= foodSize;
+    if (foodPosition.x > viewWidth-foodSize)
+        foodPosition.x -= foodSize;
+    if (foodPosition.y > viewHeight-foodSize)
+        foodPosition.y -= foodSize;
 
-    foodObject.style.left = GetPixels(foodX);
-    foodObject.style.top = GetPixels(foodY);
+    foodObject.style.left = GetPixels(foodPosition.x);
+    foodObject.style.top = GetPixels(foodPosition.y);
 }
 
 
@@ -118,22 +118,49 @@ function SetPlayerDirectionAndSpeed()
     var magnitudeX = dirx;
     var magnitudeY = diry;
 
-    x += (playerMaxSpeed * magnitudeX ) * deltaTime;
-    y += (playerMaxSpeed * magnitudeY ) * deltaTime;
+    playerPosition.x += (playerMaxSpeed * magnitudeX ) * deltaTime;
+    playerPosition.y += (playerMaxSpeed * magnitudeY ) * deltaTime;
+
+    for (i = 0; i < wormSegments.length; i++)
+    {
+        wormSegments[i].position.x += (playerMaxSpeed * magnitudeX ) * deltaTime;
+        wormSegments[i].position.y += (playerMaxSpeed * magnitudeY ) * deltaTime;
+    }
 }
 
 
-function SetPlayerPosition(_x, _y)
+function UpdateWorm()
 {
-    var xInPixels = GetPixels(_x);
-    var yInPixels = GetPixels(_y);
+    UpdatePosition(playerObject, playerPosition);
 
-    playerObject.style.left = xInPixels;
-    playerObject.style.top = yInPixels;    
+    console.log(wormSegments.length);
 
+    for (i = 0; i < wormSegments.length; i++)
+    {
+        UpdatePosition(wormSegments[i].model, wormSegments[i].position)
+    }
+}
+
+function UpdatePosition(object, vector)
+{
+    object.style.left = GetPixels(vector.x);
+    object.style.top = GetPixels(vector.y);   
 }
 
 
+function AddTailSegment()
+{
+    var newSegment = new WormSegment();
+    newSegment.CreateSegment();
+
+    var newPos = new Vector2(wormSegments[wormSegments.length-1].position.x, wormSegments[wormSegments.length-1].position.y - newSegment.size)
+    newSegment.SetPosition(newPos);
+    UpdatePosition(newSegment.model, newPos);
+    
+    wormSegments.push(newSegment);
+    container.appendChild(newSegment.model);
+
+}
 
 
 function RunPlayerObjectSetup()
@@ -151,6 +178,19 @@ function RunPlayerObjectSetup()
 
     container.appendChild(playerObject); 
     playerObject.appendChild(playerModel);
+
+    //Create First Tail Segment
+    var newSegment = new WormSegment();
+
+    newSegment.CreateSegment();
+    
+
+    var newPos = new Vector2(playerPosition.x, playerPosition.y - newSegment.size)
+    newSegment.SetPosition(newPos);
+    UpdatePosition(newSegment.model, newPos);
+
+    wormSegments.push(newSegment);
+    container.appendChild(newSegment.model);
 }
 
 
@@ -182,11 +222,12 @@ function CheckCollisions()
 
 function CheckFoodCollision()
 {
-    if (x + playerSize > foodX && x < foodX + foodSize && y + playerSize > foodY && y < foodY + foodSize)
+    if (playerPosition.x + playerSize > foodPosition.x && playerPosition.x < foodPosition.x + foodSize && playerPosition.y + playerSize > foodPosition.y && playerPosition.y < foodPosition.y + foodSize)
     {
-        playerMaxSpeed += 5;
+        playerMaxSpeed += 2;
         UpdateScoreList();
         PlaceFood();
+        AddTailSegment();
     }        
 }
 
@@ -201,26 +242,26 @@ function CheckWallCollision()
 {
    
     //Left
-    if (x < 0)
+    if (playerPosition.x < 0)
     {
         playerObject.style.left = GetPixels(0);
         dirx = 0;
 
     }
     //Right
-    if (x > viewWidth - playerSize)
+    if (playerPosition.x > viewWidth - playerSize)
     {
         playerObject.style.left = GetPixels(viewWidth-playerSize);
         dirx = 0;
     }
     //Top
-    if (y < 0)
+    if (playerPosition.y < 0)
     {
         playerObject.style.top = GetPixels(0);
         diry = 0;
     }
     //Bottom
-    if (y > viewHeight - playerSize)
+    if (playerPosition.y > viewHeight - playerSize)
     {
         playerObject.style.top = GetPixels(viewHeight-playerSize);
         diry = 0;
@@ -238,7 +279,7 @@ function CheckWallCollision()
 
 function UpdateDebug()
 {
-    debug.innerHTML = "X: " + x + ". Y: " + y + "." + '<p></p>' + "FoodX: " + foodX + ". FoodY: " + foodY + "." + '<p></p>' + "Speed: " + playerMaxSpeed;
+    debug.innerHTML = "X: " + playerPosition.x + ". Y: " + playerPosition.y + "." + '<p></p>' + "FoodX: " + foodPosition.x + ". FoodY: " + foodPosition.y + "." + '<p></p>' + "Speed: " + playerMaxSpeed;
 }
 
 
@@ -247,15 +288,6 @@ function UpdateDebug()
 
 
 
-
-
-
-// Not in use. Does it work?
-function Vector2(x, y)
-{
-    x = this.x;
-    y = this.y;
-}
 
 
 
@@ -299,4 +331,46 @@ function RotatePlayer(dirx, diry)
     var degrees = rad * ( 180 / Math.PI)
     
     playerModel.style.transform = `rotate(${degrees-90}deg)`;
+}
+
+
+
+
+class Vector2
+{  
+    constructor(_x, _y)
+    {
+        this.x = _x;
+        this.y = _y;
+    }
+}
+
+
+class WormSegment
+{
+    constructor()
+    {
+        
+    }
+    
+    position;
+    size = 28;
+
+    CreateSegment()
+    {
+        this.model = document.createElement('img');
+        this.model.className = 'wormSegment';    
+    
+        this.model.setAttribute('src', playerSpriteBody);
+        this.model.setAttribute('height', this.size);
+        this.model.setAttribute('width', this.size);
+        this.model.setAttribute('alt', "SEGMENT");
+    }
+
+    SetPosition(pos)
+    {
+        this.position = pos;
+
+    }
+
 }
