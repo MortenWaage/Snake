@@ -199,31 +199,42 @@ function UpdateScoreList()
 
 function CheckWallCollision()
 {
+    var hasCollided = false;
     
     //Left
     if (x < 0)
     {
         playerObject.style.left = GetPixels(0);
         dirx = 0;
+        hasCollided = true;
+
     }
     //Right
     if (x > viewWidth - playerSize)
     {
         playerObject.style.left = GetPixels(viewWidth-playerSize);
         dirx = 0;
+        hasCollided = true;
     }
     //Top
     if (y < 0)
     {
         playerObject.style.top = GetPixels(0);
         diry = 0;
+        hasCollided = true;
     }
     //Bottom
     if (y > viewHeight - playerSize)
     {
         playerObject.style.top = GetPixels(viewHeight-playerSize);
         diry = 0;
+        hasCollided = true;
     }
+
+    if(hasCollided)
+        SetPlayerPosition(200, 200)
+        playerMaxSpeed = playerBaseSpeed;
+        score = 0;
 }
 
 
