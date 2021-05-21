@@ -213,7 +213,6 @@ function CheckSegmentDirection(segment, previousSegment)
 
 
 
-
 function UpdateWorm()
 {
     UpdatePosition(playerObject, playerPosition);
@@ -465,28 +464,31 @@ function CheckIfPreviousSegmentTurned()
 {
     for (s = 1; s < wormSegments.length; s++)
     {
-        if (wormSegments[s].position.x != wormSegments[s-1].lastDirection.x || wormSegments[s].position.y != wormSegments[s-1].lastDirection.y)
+        wormSegments[s].lastDirection.x = wormSegments[s].direction.x;
+        wormSegments[s].lastDirection.y = wormSegments[s].direction.y;
+
+        if (wormSegments[s].direction.x != wormSegments[s-1].lastDirection.x || wormSegments[s].direction.y != wormSegments[s-1].lastDirection.y)
         {  
     
-            if (wormSegments[s-1].direction.y == 1)
+            if (wormSegments[s].direction.y == 1)
             {
-                wormSegments[s].nextTurnPoint.x = playerPosition.x;
-                wormSegments[s].nextTurnPoint.y = playerPosition.y + playerSize;
+                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x;
+                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.y + wormSegments[s].size;
             }
-            if (wormSegments[s-1].direction.y == -1)
+            if (wormSegments[s].direction.y == -1)
             {
-                wormSegments[s].nextTurnPoint.x = playerPosition.x;
-                wormSegments[s].nextTurnPoint.y = playerPosition.y;
+                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x;
+                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.y;
             }
-            if (wormSegments[s-1].direction.y == 1)
+            if (wormSegments[s].direction.x == 1)
             {
-                wormSegments[s].nextTurnPoint.x = playerPosition.x + playerSize;
-                wormSegments[s].nextTurnPoint.y = playerPosition.y;
+                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x + wormSegments[s].size;
+                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.deltaY;
             }
-            if (wormSegments[s-1].direction.y == -1)
+            if (wormSegments[s].direction.x == -1)
             {
-                wormSegments[s].nextTurnPoint.x = playerPosition.x;
-                wormSegments[s].nextTurnPoint.y = playerPosition.y;
+                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x;
+                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.y;
             }
         
             wormSegments[s].nextTurnDirection.x = wormSegments[s-1].direction.x;
