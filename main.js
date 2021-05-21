@@ -1,4 +1,3 @@
-// TODO - Make Class for head of Worm and the food.
 
 var viewWidth = 800;
 var viewHeight = 640;
@@ -21,8 +20,8 @@ var spawnPosition;
 var playerPosition;
 var playerSize = 32;
 
-var headDirection;
-var lastHeadDirection;
+var direction;
+var lastdirection;
 
 var score = 0;
 var scoreBoard;
@@ -39,7 +38,11 @@ var deltaTime;
 var frameRate = 30;
 
 
-var wormCounter = 0; // for testing the tail segment updates
+
+
+
+
+
 
 
 // Initial Config
@@ -66,15 +69,28 @@ function Init()
 
 
 
+
+
+
+
+
 // Configure Game Objects
 function Start()
 {
-    RunPlayerObjectSetup();  
+    
+    RunPlayerObjectSetup(); 
     RunFoodSetup();   
     PlaceFood();
 
     setInterval(Update, frameRate/1000);
 }
+
+
+
+
+
+
+
 
 
 
@@ -92,26 +108,23 @@ function Update()
 
 }
 
-function PlaceFood()
-{
-    foodObject.position.x = Math.random() * viewWidth;
-    foodObject.position.y = Math.random() * viewHeight;
 
-    if (foodObject.position.x > viewWidth-foodObject.size)
-        foodObject.position.x -= foodObject.size;
-    if (foodObject.position.y > viewHeight-foodObject.size)
-        foodObject.position.y -= foodObject.size;
 
-    foodObject.object.style.left = GetPixels(foodObject.position.x);
-    foodObject.object.style.top = GetPixels(foodObject.position.y);
-}
+
+
+
+
+
+
+
+
 
 
 function SetPlayerDirectionAndSpeed()
 {
     // Move Player
-    playerPosition.x += (playerCurrentSpeed * headDirection.x ) * deltaTime;
-    playerPosition.y += (playerCurrentSpeed * headDirection.y ) * deltaTime;
+    playerPosition.x += (playerCurrentSpeed * direction.x ) * deltaTime;
+    playerPosition.y += (playerCurrentSpeed * direction.y ) * deltaTime;
 
     // Move Tail Segments
     for (i = wormSegments.length-1; i >= 0; i--)
@@ -121,19 +134,31 @@ function SetPlayerDirectionAndSpeed()
 
         CheckSegmentDirection(wormSegments[i], wormSegments[i-1]); 
         
-        //CheckIfPreviousSegmentTurned();
-    }
-         
-
-
+        CheckIfPreviousSegmentTurned();
+    }       
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
 function CheckSegmentDirection(segment, previousSegment)
 {
     if (previousSegment == wormSegments[-1])
-        previousSegment = headDirection;
+        previousSegment = new Vector2(direction.x, direction.y);
+    else
+        previousSegment = new Vector2(previousSegment.direction.x, previousSegment.direction.y);
+    
+
+    
 
 
     // Moving Right
@@ -181,20 +206,13 @@ function CheckSegmentDirection(segment, previousSegment)
 
 
 
-function ResetGame()
-{
 
-    for (n = 0; n < wormSegments.length; n++)
-    {
-        wormSegments[n].model.remove();
-    }
-    playerObject.remove();
-    playerModel.remove();
-    wormSegments = [];
 
-    RunPlayerObjectSetup();
-    score = 0;
-}
+
+
+
+
+
 
 function UpdateWorm()
 {
@@ -206,6 +224,17 @@ function UpdateWorm()
     }
 }
 
+
+
+
+
+
+
+
+
+
+
+
 function UpdatePosition(object, pos)
 {
     object.style.left = GetPixels(pos.x);
@@ -213,78 +242,40 @@ function UpdatePosition(object, pos)
 }
 
 
+
+
+
+
+
+
+
+
 function AddTailSegment()
 {
     var newSegment = new WormSegment();
     newSegment.CreateSegment();
 
-    var newPos = new Vector2(wormSegments[wormSegments.length-1].position.x, wormSegments[wormSegments.length-1].position.y - newSegment.size)
-    newSegment.SetPosition(newPos);
-    UpdatePosition(newSegment.model, newPos);
-    
-    
-    newSegment.direction = wormSegments[wormSegments.length-1].direction;
-    wormSegments.push(newSegment);
+    newSegment.direction = new Vector2(wormSegments[wormSegments.length-1].direction.x,wormSegments[wormSegments.length-1].direction.y);
     newSegment.lastDirection = new Vector2(wormSegments[wormSegments.length-1].direction.x,wormSegments[wormSegments.length-1].direction.y);
-    container.appendChild(newSegment.model);
-
-}
-
-
-function RunPlayerObjectSetup()
-{
-
-    headDirection = new Vector2(0,0);
-    lastHeadDirection = new Vector2(0,0);
-
-    playerCurrentSpeed = playerDefaultSpeed;
-    playerPosition = new Vector2(200,300);
-
-    playerObject = document.createElement('div');
-    playerObject.className = 'player';
-
-    playerModel = document.createElement('img');
-    playerModel.className = 'player';    
-
-    playerModel.setAttribute('src', playerSpriteHead);
-    playerModel.setAttribute('height', playerSize);
-    playerModel.setAttribute('width', playerSize);
-    playerModel.setAttribute('alt', "PLAYER");
-
-    container.appendChild(playerObject); 
-    playerObject.appendChild(playerModel);
-
-    //Create First Tail Segment
-    var newSegment = new WormSegment();
-
-    newSegment.CreateSegment();
-    
-    newSegment.direction = new Vector2(headDirection.x,headDirection.y);
-    newSegment.lastDirection = new Vector2(headDirection.x, headDirection.y);
     newSegment.nextTurnDirection = new Vector2(0,0);
 
-    var newPos = new Vector2(playerPosition.x, playerPosition.y - newSegment.size)
-    newSegment.SetPosition(newPos);
-    UpdatePosition(newSegment.model, newPos);
-
-
-
-    newSegment.nextTurnPoint = new Vector2(playerPosition.x, playerPosition.y);
-
+    var offset = new Vector2(wormSegments[wormSegments.length-1].direction.x * newSegment.size, wormSegments[wormSegments.length-1].direction.y * newSegment.size)
+    newSegment.SetPosition(new Vector2(wormSegments[wormSegments.length-1].position.x + offset.x, wormSegments[wormSegments.length-1].position.y + offset.y));    
+    UpdatePosition(newSegment.model, new Vector2(wormSegments[wormSegments.length-1].position.x, wormSegments[wormSegments.length-1].position.y - newSegment.size));
     
+    newSegment.nextTurnPoint = new Vector2(wormSegments[wormSegments.length-1].position.x, wormSegments[wormSegments.length-1].position.y - newSegment.size); 
     wormSegments.push(newSegment);
     container.appendChild(newSegment.model);
+
+    console.log(wormSegments.length);
+    // for (i = 0; i < wormSegments.length; i++)
+    //     console.log(wormSegments[i].direction.x);
+    
 }
 
 
-function RunFoodSetup()
-{
-    foodObject = new Food();
-    foodObject.CreateFood();
-    foodObject.position = new Vector2(300,200);
 
-    container.appendChild(foodObject.object);
-}
+
 
 
 
@@ -295,11 +286,33 @@ function GetPixels(value)
     return value.toString() + "px";
 }
 
+
+
+
+
+
+
+
+
+
+
+
 function CheckCollisions()
 {
     CheckWallCollision();
     CheckFoodCollision();
 }
+
+
+
+
+
+
+
+
+
+
+
 
 function CheckFoodCollision()
 {
@@ -307,17 +320,35 @@ function CheckFoodCollision()
     {
         playerCurrentSpeed += 2;
         playerCurrentSpeed = Math.min(playerCurrentSpeed, playerMaxSpeed);
+        score += 1;
         UpdateScoreList();
         PlaceFood();
         AddTailSegment();
     }        
 }
 
+
+
+
+
+
+
+
+
+
 function UpdateScoreList()
-{
-    score += 1;
+{    
     scoreBoard.innerHTML = "Score: " + score.toString();
 }
+
+
+
+
+
+
+
+
+
 
 
 function CheckWallCollision()
@@ -358,81 +389,76 @@ function CheckWallCollision()
 
 
 
-function UpdateDebug()
-{
-    debug.innerHTML = "X: " + playerPosition.x + ". Y: " + playerPosition.y + "." + '<p></p>' + "FoodX: " + foodObject.position.x + ". FoodY: " + foodObject.position.y + "." + '<p></p>' + "Speed: " + playerCurrentSpeed + '<p></p>' + "WormCounter: " + wormCounter + '<p></p>' + "Spawn Pos: " + spawnPosition.x + "," + spawnPosition.y;
-    debug2.innerHTML = "Direction X: " + headDirection.x + " - " + "Direction Y: " + headDirection.y + '<p></p>' + "Tail Direction X: " + wormSegments[0].direction.x + " - " + "Tail Direction Y: " + wormSegments[0].direction.y + '<p></p>' + "Tail Turn Point X: " + wormSegments[0].nextTurnPoint.x + " - " +  "Tail Turn Point Y: " + wormSegments[0].nextTurnPoint.y; 
-}
-
-
-
-
-
-
-
-
-
-
 
 
 function GetPlayerInput(e)
 {
-    lastHeadDirection.x = headDirection.x;
-    lastHeadDirection.y = headDirection.y;
+    lastdirection.x = direction.x;
+    lastdirection.y = direction.y;
 
-    headDirection.x = 0;
-    headDirection.y = 0;
+    direction.x = 0;
+    direction.y = 0;
     
 
     if(e.code == "KeyW")
     {
-        headDirection.y += -1;        
+        direction.y += -1;        
     }
     if(e.code == "KeyS")
     {
-        headDirection.y += 1;
+        direction.y += 1;
     }
     if(e.code == "KeyA")
     {
-        headDirection.x += -1;
+        direction.x += -1;
     }
     if(e.code == "KeyD")
     {
-        headDirection.x += 1;
+        direction.x += 1;
     }
      
     
-    if (headDirection.x != lastHeadDirection.x || headDirection.y != lastHeadDirection.y)
+    if (direction.x != lastdirection.x || direction.y != lastdirection.y)
     {
-        if (headDirection.y == 1)
+        if (direction.y == 1)
         {
             wormSegments[0].nextTurnPoint.x = playerPosition.x;
             wormSegments[0].nextTurnPoint.y = playerPosition.y + playerSize;
         }
-        if (headDirection.y == -1)
+        if (direction.y == -1)
         {
             wormSegments[0].nextTurnPoint.x = playerPosition.x;
             wormSegments[0].nextTurnPoint.y = playerPosition.y;
         }
-        if (headDirection.x == 1)
+        if (direction.x == 1)
         {
             wormSegments[0].nextTurnPoint.x = playerPosition.x + playerSize;
             wormSegments[0].nextTurnPoint.y = playerPosition.y;
         }
-        if (headDirection.x == -1)
+        if (direction.x == -1)
         {
             wormSegments[0].nextTurnPoint.x = playerPosition.x;
             wormSegments[0].nextTurnPoint.y = playerPosition.y;
         }
     
-        RotatePlayer(headDirection.x, headDirection.y);
+        RotatePlayer(direction.x, direction.y);
     
-        wormSegments[0].nextTurnDirection.x = headDirection.x;
-        wormSegments[0].nextTurnDirection.y = headDirection.y;
+        wormSegments[0].nextTurnDirection.x = direction.x;
+        wormSegments[0].nextTurnDirection.y = direction.y;
     }  
 
     
 }
+
+
+
+
+
+
+
+
+
+
 
 
 function CheckIfPreviousSegmentTurned()
@@ -470,6 +496,16 @@ function CheckIfPreviousSegmentTurned()
 }
 
 
+
+
+
+
+
+
+
+
+
+
 function RotatePlayer(dirx, diry)
 {
     var deltaX = 0 - dirx;
@@ -479,74 +515,4 @@ function RotatePlayer(dirx, diry)
     var degrees = rad * ( 180 / Math.PI)
     
     playerModel.style.transform = `rotate(${degrees-90}deg)`;
-}
-
-
-
-
-class Vector2
-{  
-    constructor(_x, _y)
-    {
-        this.x = _x;
-        this.y = _y;
-    }
-}
-
-
-class WormSegment
-{
-    constructor()
-    {
-        
-    }
-    
-    direction;
-    lastDirection;
-    
-    nextTurnPoint;
-    nextTurnDirection;    
-
-    position;
-    size = 28;
-    model;
-
-    CreateSegment()
-    {
-        this.model = document.createElement('img');
-        this.model.className = 'wormSegment';    
-    
-        this.model.setAttribute('src', playerSpriteBody);
-        this.model.setAttribute('height', this.size);
-        this.model.setAttribute('width', this.size);
-        this.model.setAttribute('alt', "SEGMENT");
-    }
-
-    SetPosition(pos)
-    {
-        this.position = pos;
-    }
-
-}
-
-
-class Food
-{
-    constructor()
-    {
-
-    }
-
-    object;
-    position;
-    size = 40;
-
-    CreateFood()
-    {
-        this.object = document.createElement('img');
-        this.object.className = 'food';
-    
-        this.object.setAttribute('src', foodSprite);
-        this.object.setAttribute('alt', "FOOD");
-    }
 }
