@@ -26,13 +26,12 @@ class WormSegment
         
     }
     
-    direction;
-    lastDirection;
-    
-    nextTurnPoint;
-    nextTurnDirection;    
-
     position;
+    lastPosition;
+
+    direction;
+    offset;     
+    
     size = 28;
     model;
 
@@ -45,6 +44,7 @@ class WormSegment
         this.model.setAttribute('height', this.size);
         this.model.setAttribute('width', this.size);
         this.model.setAttribute('alt', "SEGMENT");
+        this.offset = new Vector2(0,0);
     }
 
     SetPosition(pos)
@@ -52,6 +52,41 @@ class WormSegment
         this.position = pos;
     }
 
+    CalculateOffsetAndDirection(_direction)
+    {
+        console.log(_direction.x);
+        console.log(_direction.y);
+        this.offset.x = this.size * _direction.x;
+        this.offset.y = this.size * _direction.y;
+        this.direction = new Vector2(_direction.x, _direction.y);
+    }
+    CalculateDirection()
+    {
+        var xDiff = this.position - this.lastPosition;
+        var yDiff = this.position - this.lastPosition;
+
+        if (Math.abs(xDiff > Math.abs(yDiff)))
+        {
+            this.direction.y = 0;
+            if (xDiff < 0)
+                this.direction.x = -1;
+            else
+                this.direction.x = 1;
+        }
+        else
+        {
+            this.direction.x = 0;
+            if (yDiff < 0)
+                this.direction.y = -1;
+            else
+                this.direction.y = 1;
+        }
+
+        this.offset.x = this.direction.x * this.size;
+        this.offset.y = this.direction.y * this.size;
+
+        console.log(this.offset.x + "/" + this.offset.y);
+    }
 }
 
 

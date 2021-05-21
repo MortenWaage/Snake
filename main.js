@@ -21,12 +21,11 @@ var playerPosition;
 var playerSize = 32;
 
 var direction;
-var lastdirection;
 
 var score = 0;
 var scoreBoard;
 
-var playerDefaultSpeed = 10;
+var playerDefaultSpeed = 40;
 var playerCurrentSpeed;
 var playerMaxSpeed = 60;
 var nextHeadTurnPoint;
@@ -80,7 +79,6 @@ function Start()
     
     RunPlayerObjectSetup(); 
     RunFoodSetup();   
-    PlaceFood();
 
     setInterval(Update, frameRate/1000);
 }
@@ -126,83 +124,42 @@ function SetPlayerDirectionAndSpeed()
     playerPosition.x += (playerCurrentSpeed * direction.x ) * deltaTime;
     playerPosition.y += (playerCurrentSpeed * direction.y ) * deltaTime;
 
+
+
     // Move Tail Segments
-    for (i = wormSegments.length-1; i >= 0; i--)
+    if (wormSegments.length > 0)
     {
-        wormSegments[i].position.x += (playerCurrentSpeed * wormSegments[i].direction.x) * deltaTime;
-        wormSegments[i].position.y += (playerCurrentSpeed * wormSegments[i].direction.y) * deltaTime;
+        for (i = wormSegments.length-1; i > 0; i--)
+        {
+            wormSegments[i].lastPosition = new Vector2(wormSegments[i].position.x, wormSegments[i].position.y);
+            
+            wormSegments[i].position.x = wormSegments[i-1].position.x; + wormSegments[i].offset;
+            wormSegments[i].position.y = wormSegments[i-1].position.y; + wormSegments[i].offset;
 
-        CheckSegmentDirection(wormSegments[i], wormSegments[i-1]); 
+            wormSegments[i].CalculateDirection()
+        }
+
+        wormSegments[0].CalculateDirection()
+        wormSegments[0].lastPosition = new Vector2(wormSegments[0].position.x, wormSegments[0].position.y);
+        wormSegments[0].position.x = playerPosition.x;// + wormSegments[0].offset;
+        wormSegments[0].position.y = playerPosition.y;// + wormSegments[0].offset;
         
-        CheckIfPreviousSegmentTurned();
-    }       
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-function CheckSegmentDirection(segment, previousSegment)
-{
-    if (previousSegment == wormSegments[-1])
-        previousSegment = new Vector2(direction.x, direction.y);
-    else
-        previousSegment = new Vector2(previousSegment.direction.x, previousSegment.direction.y);
-    
-
-    
-
-
-    // Moving Right
-    if (segment.direction.x == 1)
-    {
-        if (segment.position.x >= segment.nextTurnPoint.x)
-        {
-            segment.direction.x = previousSegment.x;
-            segment.direction.y = previousSegment.y;
-        }  
-    }
-    // Moving Left
-    else if (segment.direction.x == -1)
-    {
-        if (segment.position.x <= segment.nextTurnPoint.x)
-        {
-            segment.direction.x = previousSegment.x;
-            segment.direction.y = previousSegment.y;
-        }  
     }   
-    // Moving Down
-    else if (segment.direction.y == 1)
-    {
-        if (segment.position.y >= segment.nextTurnPoint.y)
-        {
-            segment.direction.x = previousSegment.x;
-            segment.direction.y = previousSegment.y;
-        }  
-    }
-    // Moving Up
-    else if (segment.direction.y == -1)
-    {
-        if (segment.position.y <= segment.nextTurnPoint.y)
-        {
-            segment.direction.x = previousSegment.x;
-            segment.direction.y = previousSegment.y;
-        }  
-    }
-    else if (segment.direction.x == 0 && segment.direction.y == 0)
-    {
-        segment.direction.x = previousSegment.x;
-        segment.direction.y = previousSegment.y;
-    }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -254,21 +211,23 @@ function AddTailSegment()
     var newSegment = new WormSegment();
     newSegment.CreateSegment();
 
-    newSegment.direction = new Vector2(wormSegments[wormSegments.length-1].direction.x,wormSegments[wormSegments.length-1].direction.y);
-    newSegment.lastDirection = new Vector2(wormSegments[wormSegments.length-1].direction.x,wormSegments[wormSegments.length-1].direction.y);
-    newSegment.nextTurnDirection = new Vector2(0,0);
-
-    var offset = new Vector2(wormSegments[wormSegments.length-1].direction.x * newSegment.size, wormSegments[wormSegments.length-1].direction.y * newSegment.size)
-    newSegment.SetPosition(new Vector2(wormSegments[wormSegments.length-1].position.x + offset.x, wormSegments[wormSegments.length-1].position.y + offset.y));    
-    UpdatePosition(newSegment.model, new Vector2(wormSegments[wormSegments.length-1].position.x, wormSegments[wormSegments.length-1].position.y - newSegment.size));
+    if (wormSegments.length > 0)
+    {
+        newSegment.CalculateOffsetAndDirection(wormSegments[wormSegments.length-1].direction);
+        newSegment.SetPosition(new Vector2(wormSegments[wormSegments.length-1].position.x  - newSegment.offset.x ,wormSegments[wormSegments.length-1].position.y - newSegment.offset.y));
+    }
+    else if (wormSegments.length == 0)
+    {
+        newSegment.CalculateOffsetAndDirection(direction);
+        newSegment.SetPosition(new Vector2(playerPosition.x - newSegment.offset.x, playerPosition.y - newSegment.offset.y));
+    }            
     
-    newSegment.nextTurnPoint = new Vector2(wormSegments[wormSegments.length-1].position.x, wormSegments[wormSegments.length-1].position.y - newSegment.size); 
-    wormSegments.push(newSegment);
     container.appendChild(newSegment.model);
+    wormSegments.push(newSegment);
 
-    console.log(wormSegments.length);
-    // for (i = 0; i < wormSegments.length; i++)
-    //     console.log(wormSegments[i].direction.x);
+    UpdatePosition(newSegment.model, newSegment.position);
+
+    console.log("Worm is now " + wormSegments.length + " segments long.");
     
 }
 
@@ -415,36 +374,9 @@ function GetPlayerInput(e)
     {
         direction.x += 1;
     }
-     
+         
     
-    if (direction.x != lastdirection.x || direction.y != lastdirection.y)
-    {
-        if (direction.y == 1)
-        {
-            wormSegments[0].nextTurnPoint.x = playerPosition.x;
-            wormSegments[0].nextTurnPoint.y = playerPosition.y + playerSize;
-        }
-        if (direction.y == -1)
-        {
-            wormSegments[0].nextTurnPoint.x = playerPosition.x;
-            wormSegments[0].nextTurnPoint.y = playerPosition.y;
-        }
-        if (direction.x == 1)
-        {
-            wormSegments[0].nextTurnPoint.x = playerPosition.x + playerSize;
-            wormSegments[0].nextTurnPoint.y = playerPosition.y;
-        }
-        if (direction.x == -1)
-        {
-            wormSegments[0].nextTurnPoint.x = playerPosition.x;
-            wormSegments[0].nextTurnPoint.y = playerPosition.y;
-        }
-    
-        RotatePlayer(direction.x, direction.y);
-    
-        wormSegments[0].nextTurnDirection.x = direction.x;
-        wormSegments[0].nextTurnDirection.y = direction.y;
-    }  
+    RotatePlayer(direction.x, direction.y);
 
     
 }
@@ -456,46 +388,6 @@ function GetPlayerInput(e)
 
 
 
-
-
-
-
-function CheckIfPreviousSegmentTurned()
-{
-    for (s = 1; s < wormSegments.length; s++)
-    {
-        wormSegments[s].lastDirection.x = wormSegments[s].direction.x;
-        wormSegments[s].lastDirection.y = wormSegments[s].direction.y;
-
-        if (wormSegments[s].direction.x != wormSegments[s-1].lastDirection.x || wormSegments[s].direction.y != wormSegments[s-1].lastDirection.y)
-        {  
-    
-            if (wormSegments[s].direction.y == 1)
-            {
-                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x;
-                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.y + wormSegments[s].size;
-            }
-            if (wormSegments[s].direction.y == -1)
-            {
-                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x;
-                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.y;
-            }
-            if (wormSegments[s].direction.x == 1)
-            {
-                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x + wormSegments[s].size;
-                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.deltaY;
-            }
-            if (wormSegments[s].direction.x == -1)
-            {
-                wormSegments[s].nextTurnPoint.x = wormSegments[s-1].position.x;
-                wormSegments[s].nextTurnPoint.y = wormSegments[s-1].position.y;
-            }
-        
-            wormSegments[s].nextTurnDirection.x = wormSegments[s-1].direction.x;
-            wormSegments[s].nextTurnDirection.y = wormSegments[s-1].direction.y;
-        } 
-    }
-}
 
 
 

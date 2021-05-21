@@ -2,8 +2,6 @@ function RunPlayerObjectSetup()
 {
     SetUpWormHead();
 
-    SetUpFirstWormTailSegment();
-
 }
 
 
@@ -47,32 +45,6 @@ function SetUpWormHead()
 
 
 
-function SetUpFirstWormTailSegment()
-{
-    var newSegment = new WormSegment();
-    newSegment.CreateSegment();
-
-    newSegment.direction = new Vector2(direction.x, direction.y);
-    newSegment.lastDirection = new Vector2(direction.x, direction.y);
-    newSegment.nextTurnDirection = new Vector2(0,0);
-
-    newSegment.SetPosition(new Vector2(playerPosition.x, playerPosition.y - newSegment.size));
-    UpdatePosition(newSegment.model, newSegment.position);
-
-    newSegment.nextTurnPoint = new Vector2(playerPosition.x, playerPosition.y);
-    wormSegments.push(newSegment);
-    container.appendChild(newSegment.model);
-}
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -103,9 +75,12 @@ function RunFoodSetup()
 {
     foodObject = new Food();
     foodObject.CreateFood();
-    foodObject.position = new Vector2(300,200);
+    foodObject.position = new Vector2(200,350);
 
     container.appendChild(foodObject.object);
+
+    foodObject.object.style.left = GetPixels(foodObject.position.x);
+    foodObject.object.style.top = GetPixels(foodObject.position.y);
 }
 
 
