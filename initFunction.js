@@ -46,6 +46,41 @@ function SetUpWormHead()
 
 
 
+function AddTailSegment()
+{
+    var newSegment = new WormSegment();
+    newSegment.CreateSegment();
+
+    if (wormSegments.length > 0)
+    {
+        newSegment.SetDirection(wormSegments[wormSegments.length-1].direction);
+        newSegment.SetPosition(new Vector2(wormSegments[wormSegments.length-1].position.x ,wormSegments[wormSegments.length-1].position.y));
+    }
+    else if (wormSegments.length == 0)
+    {
+        newSegment.SetDirection(direction);
+        newSegment.SetPosition(new Vector2(playerPosition.x, playerPosition.y));
+    }            
+    
+    container.appendChild(newSegment.model);
+    wormSegments.push(newSegment);
+
+    UpdatePosition(newSegment.model, newSegment.position);
+
+    console.log("Worm is now " + wormSegments.length + " segments long.");
+    
+}
+
+
+
+
+
+
+
+
+
+
+
 
 
 function PlaceFood()
@@ -102,8 +137,18 @@ function ResetGame()
     playerObject.remove();
     playerModel.remove();
     wormSegments = [];
+    wormPath = [];
+
+    debug2.innerHTML = "Worm Path Length: ";
 
     RunPlayerObjectSetup();
     score = 0;
     UpdateScoreList();
 }
+
+
+
+
+
+
+

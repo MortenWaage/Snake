@@ -37,6 +37,7 @@ var deltaTime;
 var frameRate = 30;
 
 
+var wormPath = [];
 
 
 
@@ -124,45 +125,50 @@ function SetPlayerDirectionAndSpeed()
     playerPosition.x += (playerCurrentSpeed * direction.x ) * deltaTime;
     playerPosition.y += (playerCurrentSpeed * direction.y ) * deltaTime;
 
-
+    AddPointToWormPath(playerPosition);     
 
     // Move Tail Segments
     if (wormSegments.length > 0)
     {
         for (i = wormSegments.length-1; i > 0; i--)
-        {
-            wormSegments[i].lastPosition = new Vector2(wormSegments[i].position.x, wormSegments[i].position.y);
-            
-            wormSegments[i].position.x = wormSegments[i-1].position.x; + wormSegments[i].offset;
-            wormSegments[i].position.y = wormSegments[i-1].position.y; + wormSegments[i].offset;
-
-            wormSegments[i].CalculateDirection()
+        {               
+            wormSegments[i].position.x = wormPath[(wormPath.length-1) - wormSegments[i].size - (i*wormSegments[i].size)].x;
+            wormSegments[i].position.y = wormPath[(wormPath.length-1) - wormSegments[i].size - (i*wormSegments[i].size)].y;
         }
 
-        wormSegments[0].CalculateDirection()
-        wormSegments[0].lastPosition = new Vector2(wormSegments[0].position.x, wormSegments[0].position.y);
-        wormSegments[0].position.x = playerPosition.x;// + wormSegments[0].offset;
-        wormSegments[0].position.y = playerPosition.y;// + wormSegments[0].offset;
+        wormSegments[0].position.x = wormPath[(wormPath.length-1) - (1*wormSegments[i].size)].x;
+        wormSegments[0].position.y = wormPath[(wormPath.length-1) - (1*wormSegments[i].size)].y; 
+        
+        let sliceStart = wormPath.length - ((wormSegments.length * wormSegments[0].size) + 10);
+
+        if (wormPath.length > (wormSegments.length * wormSegments[0].size) * 10)
+            wormPath = wormPath.slice(sliceStart);
+
+     
+        debug2.innerHTML = "Worm Path Length: " + wormPath.length;
+        
         
     }   
 }
 
 
+function AddPointToWormPath(pos)
+{
+    if (wormPath.length == 0)
+    {
+        var newPoint = new Vector2(pos.x, pos.y);
+        wormPath.push(newPoint);
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    if (wormPath.length > 0)
+    {
+        if (wormPath[wormPath.length-1].x != pos.x || wormPath[wormPath.length-1].y != pos.y)
+        {
+            var newPoint = new Vector2(pos.x, pos.y);
+            wormPath.push(newPoint);
+        }                
+    }        
+} 
 
 
 
@@ -185,12 +191,6 @@ function UpdateWorm()
 
 
 
-
-
-
-
-
-
 function UpdatePosition(object, pos)
 {
     object.style.left = GetPixels(pos.x);
@@ -203,46 +203,15 @@ function UpdatePosition(object, pos)
 
 
 
-
-
-
-function AddTailSegment()
-{
-    var newSegment = new WormSegment();
-    newSegment.CreateSegment();
-
-    if (wormSegments.length > 0)
-    {
-        newSegment.CalculateOffsetAndDirection(wormSegments[wormSegments.length-1].direction);
-        newSegment.SetPosition(new Vector2(wormSegments[wormSegments.length-1].position.x  - newSegment.offset.x ,wormSegments[wormSegments.length-1].position.y - newSegment.offset.y));
-    }
-    else if (wormSegments.length == 0)
-    {
-        newSegment.CalculateOffsetAndDirection(direction);
-        newSegment.SetPosition(new Vector2(playerPosition.x - newSegment.offset.x, playerPosition.y - newSegment.offset.y));
-    }            
-    
-    container.appendChild(newSegment.model);
-    wormSegments.push(newSegment);
-
-    UpdatePosition(newSegment.model, newSegment.position);
-
-    console.log("Worm is now " + wormSegments.length + " segments long.");
-    
-}
-
-
-
-
-
-
-
-
-
 function GetPixels(value)
 {
     return value.toString() + "px";
 }
+
+
+
+
+
 
 
 
