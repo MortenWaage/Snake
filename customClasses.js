@@ -77,6 +77,18 @@ class WormSegment
     {
         this.direction = new Vector2(_direction.x, _direction.y);
     }
+
+    CheckIfCollided(pos, size)
+    {
+        let playerCenter = new Vector2(pos.x + (size/2), pos.y + (size/2));
+        let tolerance = 5;
+
+        if (playerCenter.x > this.position.x + (this.size/tolerance) && playerCenter.x < this.position.x + (this.size - (this.size/tolerance)) &&
+            playerCenter.y > this.position.y + (this.size/tolerance) && playerCenter.y < this.position.y + (this.size - (this.size/tolerance))  )
+            {
+                ResetGame();
+            }
+    }
 }
 
 

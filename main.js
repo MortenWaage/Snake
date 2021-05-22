@@ -34,7 +34,7 @@ var container;
 
 
 var deltaTime;
-var frameRate = 30;
+var frameRate = 20;
 
 
 var wormPath = [];
@@ -182,6 +182,7 @@ function UpdateWorm()
 
     for (i = 0; i < wormSegments.length; i++)
     {
+        wormSegments[i].CheckIfCollided(playerPosition, playerSize);
         UpdatePosition(wormSegments[i].model, wormSegments[i].position);
     }
 }
@@ -327,19 +328,19 @@ function GetPlayerInput(e)
     direction.y = 0;
     
 
-    if(e.code == "KeyW")
+    if(e.code == "KeyW" || e.code == "ArrowUp")
     {
         direction.y += -1;        
     }
-    if(e.code == "KeyS")
+    if(e.code == "KeyS" || e.code == "ArrowDown")
     {
         direction.y += 1;
     }
-    if(e.code == "KeyA")
+    if(e.code == "KeyA" || e.code == "ArrowLeft")
     {
         direction.x += -1;
     }
-    if(e.code == "KeyD")
+    if(e.code == "KeyD" || e.code == "ArrowRight")
     {
         direction.x += 1;
     }
