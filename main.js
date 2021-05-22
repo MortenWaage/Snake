@@ -1,3 +1,4 @@
+var container;
 
 var viewWidth = 800;
 var viewHeight = 640;
@@ -15,29 +16,27 @@ var playerObject;
 
 var foodObjects = [];
 var wormSegments = [];
+var wormPath = [];
 
 var spawnPosition;
 var playerPosition;
 var playerSize = 32;
 
-var direction;
-
-var score = 0;
-var scoreBoard;
-
 var playerDefaultSpeed = 40;
 var playerCurrentSpeed;
 var playerMaxSpeed = 60;
-var nextHeadTurnPoint;
 
-var container;
 
+var direction;
+
+var score = 0;
+var topScore = 0;
+var scoreBoard;
 
 var deltaTime;
 var frameRate = 20;
 
 
-var wormPath = [];
 
 
 
@@ -45,7 +44,7 @@ var wormPath = [];
 
 
 
-// Initial Config
+
 function Init()
 {
     deltaTime = frameRate/1000;   
@@ -69,12 +68,6 @@ function Init()
 
 
 
-
-
-
-
-
-// Configure Game Objects
 function Start()
 {
     
@@ -83,11 +76,6 @@ function Start()
 
     setInterval(Update, frameRate/1000);
 }
-
-
-
-
-
 
 
 
@@ -115,10 +103,6 @@ function Update()
 
 
 
-
-
-
-
 function SetPlayerDirectionAndSpeed()
 {
     // Move Player
@@ -131,25 +115,29 @@ function SetPlayerDirectionAndSpeed()
     if (wormSegments.length > 0)
     {
         for (i = wormSegments.length-1; i > 0; i--)
-        {               
+        {                               
             wormSegments[i].position.x = wormPath[(wormPath.length-1) - wormSegments[i].size - (i*wormSegments[i].size)].x;
             wormSegments[i].position.y = wormPath[(wormPath.length-1) - wormSegments[i].size - (i*wormSegments[i].size)].y;
         }
 
-        wormSegments[0].position.x = wormPath[(wormPath.length-1) - (1*wormSegments[i].size)].x;
-        wormSegments[0].position.y = wormPath[(wormPath.length-1) - (1*wormSegments[i].size)].y; 
+        wormSegments[0].position.x = wormPath[(wormPath.length-1) - (1*wormSegments[0].size)].x;
+        wormSegments[0].position.y = wormPath[(wormPath.length-1) - (1*wormSegments[0].size)].y;         
         
-        let sliceStart = wormPath.length - ((wormSegments.length * wormSegments[0].size) + 10);
 
-        if (wormPath.length > (wormSegments.length * wormSegments[0].size) * 10)
+        if (wormPath.length > (wormSegments.length * wormSegments[0].size) * 2)
+        {
+            let sliceStart = wormPath.length - ((wormSegments.length * wormSegments[0].size) + 50);
             wormPath = wormPath.slice(sliceStart);
+        }             
+    }  
 
-     
-        debug2.innerHTML = "Worm Path Length: " + wormPath.length;
-        
-        
-    }   
+    debug2.innerHTML = "Worm Path Length: " + wormPath.length;       
 }
+
+
+
+
+
 
 
 function AddPointToWormPath(pos)
@@ -162,7 +150,7 @@ function AddPointToWormPath(pos)
 
     if (wormPath.length > 0)
     {
-        if (wormPath[wormPath.length-1].x != pos.x || wormPath[wormPath.length-1].y != pos.y)
+        if (wormPath[wormPath.length-1].position != pos)
         {
             var newPoint = new Vector2(pos.x, pos.y);
             wormPath.push(newPoint);
@@ -219,20 +207,11 @@ function GetPixels(value)
 
 
 
-
-
-
-
-
-
 function CheckCollisions()
 {
     CheckWallCollision();
     CheckFoodCollision();
 }
-
-
-
 
 
 
@@ -262,15 +241,10 @@ function CheckFoodCollision()
 
 
 
-
-
 function UpdateScoreList()
 {    
-    scoreBoard.innerHTML = "Score: " + score.toString();
+    scoreBoard.innerHTML = "Score: " + score.toString() + '<p></p><p></p>' + "Best Score: " + topScore.toString();;
 }
-
-
-
 
 
 
@@ -281,37 +255,14 @@ function UpdateScoreList()
 
 function CheckWallCollision()
 {
-   
-    //Left
-    if (playerPosition.x < 0)
+    if (playerPosition.x < 0 ||
+        playerPosition.x > viewWidth - playerSize ||
+        playerPosition.y < 0 ||
+        playerPosition.y > viewHeight - playerSize )     
     {
-        playerObject.style.left = GetPixels(0);
         ResetGame();
-    }
-    //Right
-    if (playerPosition.x > viewWidth - playerSize)
-    {
-        playerObject.style.left = GetPixels(viewWidth-playerSize);
-        ResetGame();
-    }
-    //Top
-    if (playerPosition.y < 0)
-    {
-        playerObject.style.top = GetPixels(0);
-        ResetGame();
-    }
-    //Bottom
-    if (playerPosition.y > viewHeight - playerSize)
-    {
-        playerObject.style.top = GetPixels(viewHeight-playerSize);
-        ResetGame();
-    }     
+    }    
 }
-
-
-
-
-
 
 
 
@@ -321,50 +272,44 @@ function CheckWallCollision()
 
 function GetPlayerInput(e)
 {
-    lastdirection.x = direction.x;
-    lastdirection.y = direction.y;
-
-    direction.x = 0;
-    direction.y = 0;
-    
 
     if(e.code == "KeyW" || e.code == "ArrowUp")
     {
-        direction.y += -1;        
+        if (direction.y != 1)
+        {
+            direction.x = 0;
+            direction.y = -1;
+        }    
     }
     if(e.code == "KeyS" || e.code == "ArrowDown")
     {
-        direction.y += 1;
+        if (direction.y != -1)
+        {
+            direction.x = 0;
+            direction.y = 1;
+        }
     }
     if(e.code == "KeyA" || e.code == "ArrowLeft")
     {
-        direction.x += -1;
+        if (direction.x != 1)
+        {
+            direction.x = -1;
+            direction.y = 0;
+        }
     }
     if(e.code == "KeyD" || e.code == "ArrowRight")
     {
-        direction.x += 1;
-    }
-         
+        if (direction.x != -1)
+        {
+            direction.x = 1;
+            direction.y = 0;
+        }
+
+    }         
     
     RotatePlayer(direction.x, direction.y);
-
     
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
