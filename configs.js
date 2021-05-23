@@ -134,27 +134,38 @@ function ResetGame()
     {
         wormSegments[n].model.remove();
     }
-    playerObject.remove();
+    playerObject.remove();    
     playerModel.remove();
+
+    foodObject.object.remove();
+
     wormSegments = [];
     wormPath = [];
 
     debug2.innerHTML = "Worm Path Length: ";
 
-    RunPlayerObjectSetup();
-    
-    score = CheckHighScore(score);
-
+    ResetScoreBoard();
     UpdateScoreList();
+
+    RunPlayerObjectSetup();
+    RunFoodSetup();
+    
+
 }
 
 
-function CheckHighScore(_score)
+
+
+
+
+
+
+function ResetScoreBoard()
 {
     if (score > topScore)
         topScore = score;
     
-    return 0;
+    score = 0;
 }
 
 

@@ -18,17 +18,17 @@ class Vector2
 
 
 
-class WormHead
-{
-    constructor()
-    {
+// class WormHead
+// {
+//     constructor()
+//     {
 
-    }
+//     }
 
-    direction;
-    lastDirection;
+//     direction;
+//     lastDirection;
 
-}
+// }
 
 
 
@@ -50,7 +50,7 @@ class WormSegment
     
     position;
     direction;      
-    size = 28;
+    size = 32;
     model;
 
     CreateSegment()

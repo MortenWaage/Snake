@@ -14,7 +14,6 @@ var foodSprite = "sprites/food.png";
 var foodObject;
 var playerObject;
 
-var foodObjects = [];
 var wormSegments = [];
 var wormPath = [];
 
@@ -124,9 +123,10 @@ function SetPlayerDirectionAndSpeed()
         wormSegments[0].position.y = wormPath[(wormPath.length-1) - (1*wormSegments[0].size)].y;         
         
 
+        // Adjust Worm Path Length
         if (wormPath.length > (wormSegments.length * wormSegments[0].size) * 2)
         {
-            let sliceStart = wormPath.length - ((wormSegments.length * wormSegments[0].size) + 50);
+            let sliceStart = wormPath.length - ((wormSegments.length * wormSegments[0].size) + 50); // 50 is the safety margin. Dont want to slice array where there might be a tail segment.
             wormPath = wormPath.slice(sliceStart);
         }             
     }  
@@ -148,6 +148,9 @@ function AddPointToWormPath(pos)
         wormPath.push(newPoint);
     }
 
+    if (direction.x == 0 && direction.y == 0)
+        return;
+        
     if (wormPath.length > 0)
     {
         if (wormPath[wormPath.length-1].position != pos)
@@ -307,7 +310,7 @@ function GetPlayerInput(e)
 
     }         
     
-    RotatePlayer(direction.x, direction.y);
+    RotatePlayerSprite(direction.x, direction.y);
     
 }
 
@@ -315,7 +318,10 @@ function GetPlayerInput(e)
 
 
 
-function RotatePlayer(dirx, diry)
+
+
+
+function RotatePlayerSprite(dirx, diry)
 {
     var deltaX = 0 - dirx;
     var deltaY = 0 - diry;
